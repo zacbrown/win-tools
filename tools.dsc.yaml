@@ -1,0 +1,67 @@
+$schema: https://aka.ms/dsc/schemas/v3/bundled/config/document.json
+
+resources:
+  - name: ensure-local-bin
+    type: Microsoft.DSC/PowerShell
+    properties:
+      resources:
+        - name: local-bin
+          type: WinTools/LocalBinPath
+          properties: {}
+        - name: cargo-bin
+          type: WinTools/LocalBinPath
+          properties:
+            Path: '%USERPROFILE%\.cargo\bin'
+
+  - name: install-tools
+    type: Microsoft.DSC/PowerShell
+    dependsOn:
+      - "[resourceId('Microsoft.DSC/PowerShell', 'ensure-local-bin')]"
+    properties:
+      resources:
+        - name: ripgrep
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: ripgrep
+            Repo: BurntSushi/ripgrep
+            AssetPattern: 'ripgrep-.*-x86_64-pc-windows-msvc\.zip$'
+            Binaries: [rg.exe]
+
+        - name: fd
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: fd
+            Repo: sharkdp/fd
+            AssetPattern: 'fd-.*-x86_64-pc-windows-msvc\.zip$'
+            Binaries: [fd.exe]
+
+        - name: fzf
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: fzf
+            Repo: junegunn/fzf
+            AssetPattern: 'fzf-.*-windows_amd64\.zip$'
+            Binaries: [fzf.exe]
+
+        - name: just
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: just
+            Repo: casey/just
+            AssetPattern: 'just-.*-x86_64-pc-windows-msvc\.zip$'
+            Binaries: [just.exe]
+
+        - name: uv
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: uv
+            Repo: astral-sh/uv
+            AssetPattern: 'uv-x86_64-pc-windows-msvc\.zip$'
+            Binaries: [uv.exe, uvx.exe]
+
+        - name: rustup-init
+          type: WinTools/DirectBinary
+          properties:
+            Name: rustup-init.exe
+            Url: https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe
+
