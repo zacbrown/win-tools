@@ -56,6 +56,7 @@ class GithubReleaseTool {
     [DscProperty(Mandatory)] [string]   $AssetPattern
     [DscProperty(Mandatory)] [string[]] $Binaries
     [DscProperty()]          [string]   $VersionRegex = '(\d+\.\d+\.\d+)'
+    [DscProperty()]          [bool]     $ForceUpdateCheck = $false
 
     [DscProperty(NotConfigurable)] [string] $InstalledVersion
     [DscProperty(NotConfigurable)] [string] $TargetVersion
@@ -71,8 +72,16 @@ class GithubReleaseTool {
         $result.AssetPattern     = $this.AssetPattern
         $result.Binaries         = $this.Binaries
         $result.VersionRegex     = $this.VersionRegex
+        $result.ForceUpdateCheck = $this.ForceUpdateCheck
         $result.InstalledVersion = $this.GetInstalledVersion($primary)
-        $result.TargetVersion    = $this.ResolveTargetVersion()
+        # Mirror Test()'s short-circuit: don't hit the API just to populate TargetVersion
+        # when Version is 'latest' — DSC v3 calls Get() during 'set', so this would burn
+        # the rate limit even when nothing needs installing.
+        $result.TargetVersion    = if ($this.Version -eq 'latest' -and -not $this.ForceUpdateCheck) {
+            'latest'
+        } else {
+            $this.ResolveTargetVersion()
+        }
         return $result
     }
 
@@ -81,6 +90,9 @@ class GithubReleaseTool {
         foreach ($b in $this.Binaries) {
             if (-not (Test-Path (Join-Path $binDir $b))) { return $false }
         }
+        # Short-circuit for 'latest' to avoid hammering the GitHub API on every run.
+        # Set ForceUpdateCheck: true on a resource to re-enable the upstream compare.
+        if ($this.Version -eq 'latest' -and -not $this.ForceUpdateCheck) { return $true }
         $current = $this.GetInstalledVersion((Join-Path $binDir $this.Binaries[0]))
         if (-not $current) { return $false }
         return ($current -eq $this.ResolveTargetVersion())
@@ -137,6 +149,62 @@ class GithubReleaseTool {
             $this.Version
         }
         return $tag.TrimStart('v')
+    }
+}
+
+[DscResource()]
+class DirectArchive {
+    [DscProperty(Key)]       [string]   $Name
+    [DscProperty(Mandatory)] [string]   $Url
+    [DscProperty(Mandatory)] [string[]] $Binaries
+
+    [DscProperty(NotConfigurable)] [bool] $Exists
+
+    [DirectArchive] Get() {
+        $r = [DirectArchive]::new()
+        $r.Name     = $this.Name
+        $r.Url      = $this.Url
+        $r.Binaries = $this.Binaries
+        $r.Exists   = $this.AllBinariesPresent()
+        return $r
+    }
+
+    [bool] Test() {
+        return $this.AllBinariesPresent()
+    }
+
+    [void] Set() {
+        $binDir = Get-LocalBinDir
+        New-Item -ItemType Directory -Path $binDir -Force | Out-Null
+
+        $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("wintools-" + [Guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+        try {
+            $archive = Join-Path $tmp ([System.IO.Path]::GetFileName($this.Url))
+            Write-Verbose "Downloading $($this.Url)"
+            Invoke-WebRequest -Uri $this.Url -OutFile $archive -UseBasicParsing
+
+            $extract = Join-Path $tmp 'extract'
+            New-Item -ItemType Directory -Path $extract -Force | Out-Null
+            Expand-ReleaseArchive -ArchivePath $archive -DestinationDir $extract
+
+            foreach ($bin in $this.Binaries) {
+                $found = Get-ChildItem -Path $extract -Recurse -File -Filter $bin -ErrorAction SilentlyContinue |
+                    Select-Object -First 1
+                if (-not $found) { throw "Binary '$bin' not found inside $archive" }
+                Copy-Item -Path $found.FullName -Destination (Join-Path $binDir $bin) -Force
+            }
+        } finally {
+            Remove-Item -Path $tmp -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    hidden [bool] AllBinariesPresent() {
+        $binDir = Get-LocalBinDir
+        foreach ($b in $this.Binaries) {
+            if (-not (Test-Path (Join-Path $binDir $b))) { return $false }
+        }
+        return $true
     }
 }
 

@@ -73,6 +73,14 @@ resources:
             Name: rustup-init.exe
             Url: https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe
 
+        - name: dprint
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: dprint
+            Repo: dprint/dprint
+            AssetPattern: 'dprint-x86_64-pc-windows-msvc\.zip$'
+            Binaries: [dprint.exe]
+
         - name: claude-code
           type: WinTools/ScriptInstaller
           properties:
