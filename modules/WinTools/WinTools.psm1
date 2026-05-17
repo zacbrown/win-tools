@@ -265,6 +265,64 @@ class ScriptInstaller {
 }
 
 [DscResource()]
+class DprintPlugin {
+    [DscProperty(Key)] [string] $Plugin
+    [DscProperty()]    [string] $ConfigPath = "$env:USERPROFILE\.config\dprint\dprint.json"
+
+    [DscProperty(NotConfigurable)] [bool] $Installed
+
+    [DprintPlugin] Get() {
+        $r = [DprintPlugin]::new()
+        $r.Plugin     = $this.Plugin
+        $r.ConfigPath = $this.ConfigPath
+        $r.Installed  = $this.HasPlugin()
+        return $r
+    }
+
+    [bool] Test() {
+        return $this.HasPlugin()
+    }
+
+    [void] Set() {
+        $resolved = [Environment]::ExpandEnvironmentVariables($this.ConfigPath)
+        $dir = Split-Path -Parent $resolved
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        if (-not (Test-Path $resolved)) {
+            Set-Content -Path $resolved -Value '{ "plugins": [] }' -Encoding utf8
+        }
+        $dprint = Join-Path (Get-LocalBinDir) 'dprint.exe'
+        if (-not (Test-Path $dprint)) {
+            throw "dprint.exe not found at $dprint; ensure the 'dprint' resource has run."
+        }
+        Push-Location $dir
+        try {
+            & $dprint config add $this.Plugin
+            if ($LASTEXITCODE -ne 0) {
+                throw "dprint config add $($this.Plugin) failed (exit $LASTEXITCODE)"
+            }
+        } finally {
+            Pop-Location
+        }
+    }
+
+    hidden [bool] HasPlugin() {
+        $resolved = [Environment]::ExpandEnvironmentVariables($this.ConfigPath)
+        if (-not (Test-Path $resolved)) { return $false }
+        try {
+            $cfg = Get-Content -Raw -Path $resolved | ConvertFrom-Json
+            if (-not $cfg.PSObject.Properties['plugins']) { return $false }
+            $needle = [regex]::Escape($this.Plugin)
+            foreach ($p in $cfg.plugins) {
+                if ("$p" -match "/$needle-\d|/$needle\.wasm|/$needle\.json") { return $true }
+            }
+        } catch {
+            return $false
+        }
+        return $false
+    }
+}
+
+[DscResource()]
 class LocalBinPath {
     [DscProperty(Key)] [string] $Path = "$env:USERPROFILE\.local\bin"
 

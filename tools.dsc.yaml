@@ -88,3 +88,14 @@ resources:
             ScriptUrl: https://claude.ai/install.ps1
             TestPath: '%USERPROFILE%\.local\bin\claude.exe'
 
+  - name: install-dprint-plugins
+    type: Microsoft.DSC/PowerShell
+    dependsOn:
+      - "[resourceId('Microsoft.DSC/PowerShell', 'install-tools')]"
+    properties:
+      resources:
+        - name: dprint-markdown
+          type: WinTools/DprintPlugin
+          properties:
+            Plugin: markdown
+
