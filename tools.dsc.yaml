@@ -81,6 +81,14 @@ resources:
             AssetPattern: 'dprint-x86_64-pc-windows-msvc\.zip$'
             Binaries: [dprint.exe]
 
+        - name: beads
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: beads
+            Repo: gastownhall/beads
+            AssetPattern: 'beads_.*_windows_amd64\.zip$'
+            Binaries: [bd.exe]
+
         - name: claude-code
           type: WinTools/ScriptInstaller
           properties:
