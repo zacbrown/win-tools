@@ -59,6 +59,14 @@ resources:
             AssetPattern: 'uv-x86_64-pc-windows-msvc\.zip$'
             Binaries: [uv.exe, uvx.exe]
 
+        - name: gh
+          type: WinTools/GithubReleaseTool
+          properties:
+            Name: gh
+            Repo: cli/cli
+            AssetPattern: 'gh_.*_windows_amd64\.zip$'
+            Binaries: [gh.exe]
+
         - name: rustup-init
           type: WinTools/DirectBinary
           properties:
