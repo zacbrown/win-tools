@@ -169,6 +169,34 @@ class DirectBinary {
 }
 
 [DscResource()]
+class ScriptInstaller {
+    [DscProperty(Key)]       [string] $Name
+    [DscProperty(Mandatory)] [string] $ScriptUrl
+    [DscProperty(Mandatory)] [string] $TestPath
+
+    [DscProperty(NotConfigurable)] [bool] $Exists
+
+    [ScriptInstaller] Get() {
+        $r = [ScriptInstaller]::new()
+        $r.Name      = $this.Name
+        $r.ScriptUrl = $this.ScriptUrl
+        $r.TestPath  = $this.TestPath
+        $r.Exists    = Test-Path ([Environment]::ExpandEnvironmentVariables($this.TestPath))
+        return $r
+    }
+
+    [bool] Test() {
+        return Test-Path ([Environment]::ExpandEnvironmentVariables($this.TestPath))
+    }
+
+    [void] Set() {
+        Write-Verbose "Fetching $($this.ScriptUrl)"
+        $script = Invoke-RestMethod -Uri $this.ScriptUrl -UseBasicParsing
+        Invoke-Expression $script
+    }
+}
+
+[DscResource()]
 class LocalBinPath {
     [DscProperty(Key)] [string] $Path = "$env:USERPROFILE\.local\bin"
 

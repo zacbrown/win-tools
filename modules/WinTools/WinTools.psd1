@@ -5,7 +5,7 @@
     Author               = 'Zac Brown'
     Description          = 'DSC v3 resources for installing CLI tools from GitHub releases into ~/.local/bin.'
     PowerShellVersion    = '7.2'
-    DscResourcesToExport = @('GithubReleaseTool', 'DirectBinary', 'LocalBinPath')
+    DscResourcesToExport = @('GithubReleaseTool', 'DirectBinary', 'LocalBinPath', 'ScriptInstaller')
     FunctionsToExport    = @()
     CmdletsToExport      = @()
     VariablesToExport    = @()
