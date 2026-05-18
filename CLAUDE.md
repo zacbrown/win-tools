@@ -43,9 +43,9 @@ The `DscResourcesToExport` list in `WinTools.psd1` is the contract with `dsc.exe
 
 ## Adding a tool
 
-For a typical GitHub-released CLI: add a `WinTools/GithubReleaseTool` entry under the `install-tools` group in `tools.dsc.yaml`. The `AssetPattern` is a regex matched against asset filenames in the release JSON — prefer `x86_64-pc-windows-msvc` or `windows_amd64` variants, anchored with `$` to avoid matching `.sig`/`.sha256` siblings. `Binaries` is the list of executables to extract; the **first** is used for version detection.
+Default to `WinTools/DirectArchive` for a typical GitHub-released CLI. Resolve the current release tag once (e.g. `gh release view --repo <owner>/<repo>` or the releases API), then add an entry under the `install-tools` group with a literal `Url` of the form `https://github.com/<owner>/<repo>/releases/download/<tag>/<asset>`. `Binaries` is the list of executables to extract from the archive. Version bumps are explicit edits to the URL; the release-download CDN doesn't count against the GitHub API rate limit.
 
-For tools whose `--version` output doesn't match `\d+\.\d+\.\d+`, set `VersionRegex` on the resource. For tools whose release tag doesn't trivially correspond to `--version` output, expect `Test()` to always return false and `Set()` to re-run on every apply — there's no per-tool override for that mismatch today.
+Reach for `WinTools/GithubReleaseTool` only when the user explicitly asks for upstream tracking (`Version: latest`) on a specific tool. In that case, `AssetPattern` is a regex matched against asset filenames in the release JSON — prefer `x86_64-pc-windows-msvc` or `windows_amd64` variants, anchored with `$` to avoid matching `.sig`/`.sha256` siblings. The **first** binary listed is used for version detection; override `VersionRegex` if `--version` output doesn't match `\d+\.\d+\.\d+`. If a tool's release tag doesn't trivially correspond to its `--version` output, expect `Test()` to always return false and `Set()` to re-run on every apply.
 
 ## Conventions
 

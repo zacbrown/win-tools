@@ -20,51 +20,45 @@ resources:
     properties:
       resources:
         - name: ripgrep
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: ripgrep
-            Repo: BurntSushi/ripgrep
-            AssetPattern: 'ripgrep-.*-x86_64-pc-windows-msvc\.zip$'
+            Url: https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-pc-windows-msvc.zip
             Binaries: [rg.exe]
 
         - name: fd
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: fd
-            Repo: sharkdp/fd
-            AssetPattern: 'fd-.*-x86_64-pc-windows-msvc\.zip$'
+            Url: https://github.com/sharkdp/fd/releases/download/v10.4.2/fd-v10.4.2-x86_64-pc-windows-msvc.zip
             Binaries: [fd.exe]
 
         - name: fzf
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: fzf
-            Repo: junegunn/fzf
-            AssetPattern: 'fzf-.*-windows_amd64\.zip$'
+            Url: https://github.com/junegunn/fzf/releases/download/v0.72.0/fzf-0.72.0-windows_amd64.zip
             Binaries: [fzf.exe]
 
         - name: just
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: just
-            Repo: casey/just
-            AssetPattern: 'just-.*-x86_64-pc-windows-msvc\.zip$'
+            Url: https://github.com/casey/just/releases/download/1.51.0/just-1.51.0-x86_64-pc-windows-msvc.zip
             Binaries: [just.exe]
 
         - name: uv
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: uv
-            Repo: astral-sh/uv
-            AssetPattern: 'uv-x86_64-pc-windows-msvc\.zip$'
+            Url: https://github.com/astral-sh/uv/releases/download/0.11.14/uv-x86_64-pc-windows-msvc.zip
             Binaries: [uv.exe, uvx.exe]
 
         - name: gh
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: gh
-            Repo: cli/cli
-            AssetPattern: 'gh_.*_windows_amd64\.zip$'
+            Url: https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_windows_amd64.zip
             Binaries: [gh.exe]
 
         - name: rustup-init
@@ -74,19 +68,17 @@ resources:
             Url: https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe
 
         - name: dprint
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: dprint
-            Repo: dprint/dprint
-            AssetPattern: 'dprint-x86_64-pc-windows-msvc\.zip$'
+            Url: https://github.com/dprint/dprint/releases/download/0.54.0/dprint-x86_64-pc-windows-msvc.zip
             Binaries: [dprint.exe]
 
         - name: beads
-          type: WinTools/GithubReleaseTool
+          type: WinTools/DirectArchive
           properties:
             Name: beads
-            Repo: gastownhall/beads
-            AssetPattern: 'beads_.*_windows_amd64\.zip$'
+            Url: https://github.com/gastownhall/beads/releases/download/v1.0.4/beads_1.0.4_windows_amd64.zip
             Binaries: [bd.exe]
 
         - name: claude-code
