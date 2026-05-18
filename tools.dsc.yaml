@@ -24,6 +24,7 @@ resources:
           properties:
             Name: ripgrep
             Url: https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-pc-windows-msvc.zip
+            Version: 15.1.0
             Binaries: [rg.exe]
 
         - name: fd
@@ -31,6 +32,7 @@ resources:
           properties:
             Name: fd
             Url: https://github.com/sharkdp/fd/releases/download/v10.4.2/fd-v10.4.2-x86_64-pc-windows-msvc.zip
+            Version: 10.4.2
             Binaries: [fd.exe]
 
         - name: fzf
@@ -38,6 +40,7 @@ resources:
           properties:
             Name: fzf
             Url: https://github.com/junegunn/fzf/releases/download/v0.72.0/fzf-0.72.0-windows_amd64.zip
+            Version: 0.72.0
             Binaries: [fzf.exe]
 
         - name: just
@@ -45,6 +48,7 @@ resources:
           properties:
             Name: just
             Url: https://github.com/casey/just/releases/download/1.51.0/just-1.51.0-x86_64-pc-windows-msvc.zip
+            Version: 1.51.0
             Binaries: [just.exe]
 
         - name: uv
@@ -52,6 +56,7 @@ resources:
           properties:
             Name: uv
             Url: https://github.com/astral-sh/uv/releases/download/0.11.14/uv-x86_64-pc-windows-msvc.zip
+            Version: 0.11.14
             Binaries: [uv.exe, uvx.exe]
 
         - name: gh
@@ -59,6 +64,7 @@ resources:
           properties:
             Name: gh
             Url: https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_windows_amd64.zip
+            Version: 2.92.0
             Binaries: [gh.exe]
 
         - name: rustup-init
@@ -72,6 +78,7 @@ resources:
           properties:
             Name: dprint
             Url: https://github.com/dprint/dprint/releases/download/0.54.0/dprint-x86_64-pc-windows-msvc.zip
+            Version: 0.54.0
             Binaries: [dprint.exe]
 
         - name: beads
@@ -79,6 +86,7 @@ resources:
           properties:
             Name: beads
             Url: https://github.com/gastownhall/beads/releases/download/v1.0.4/beads_1.0.4_windows_amd64.zip
+            Version: 1.0.4
             Binaries: [bd.exe]
 
         - name: claude-code

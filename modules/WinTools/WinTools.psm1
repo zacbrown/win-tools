@@ -157,20 +157,33 @@ class DirectArchive {
     [DscProperty(Key)]       [string]   $Name
     [DscProperty(Mandatory)] [string]   $Url
     [DscProperty(Mandatory)] [string[]] $Binaries
+    [DscProperty()]          [string]   $Version
+    [DscProperty()]          [string]   $VersionRegex = '(\d+\.\d+\.\d+)'
 
-    [DscProperty(NotConfigurable)] [bool] $Exists
+    [DscProperty(NotConfigurable)] [bool]   $Exists
+    [DscProperty(NotConfigurable)] [string] $InstalledVersion
 
     [DirectArchive] Get() {
+        $binDir = Get-LocalBinDir
+        $primary = Join-Path $binDir $this.Binaries[0]
         $r = [DirectArchive]::new()
-        $r.Name     = $this.Name
-        $r.Url      = $this.Url
-        $r.Binaries = $this.Binaries
-        $r.Exists   = $this.AllBinariesPresent()
+        $r.Name             = $this.Name
+        $r.Url              = $this.Url
+        $r.Binaries         = $this.Binaries
+        $r.Version          = $this.Version
+        $r.VersionRegex     = $this.VersionRegex
+        $r.Exists           = $this.AllBinariesPresent()
+        $r.InstalledVersion = $this.GetInstalledVersion($primary)
         return $r
     }
 
     [bool] Test() {
-        return $this.AllBinariesPresent()
+        if (-not $this.AllBinariesPresent()) { return $false }
+        if ([string]::IsNullOrEmpty($this.Version)) { return $true }
+        $primary = Join-Path (Get-LocalBinDir) $this.Binaries[0]
+        $current = $this.GetInstalledVersion($primary)
+        if (-not $current) { return $false }
+        return ($current -eq $this.Version.TrimStart('v'))
     }
 
     [void] Set() {
@@ -205,6 +218,17 @@ class DirectArchive {
             if (-not (Test-Path (Join-Path $binDir $b))) { return $false }
         }
         return $true
+    }
+
+    hidden [string] GetInstalledVersion([string]$BinaryPath) {
+        if (-not (Test-Path $BinaryPath)) { return '' }
+        try {
+            $out = & $BinaryPath --version 2>&1 | Out-String
+            if ($out -match $this.VersionRegex) { return $matches[1] }
+        } catch {
+            return ''
+        }
+        return ''
     }
 }
 
