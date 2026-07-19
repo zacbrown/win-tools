@@ -67,6 +67,12 @@ resources:
             Version: 2.92.0
             Binaries: [gh.exe]
 
+        - name: jq
+          type: WinTools/DirectBinary
+          properties:
+            Name: jq.exe
+            Url: https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-windows-amd64.exe
+
         - name: rustup-init
           type: WinTools/DirectBinary
           properties:
