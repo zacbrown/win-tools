@@ -73,6 +73,30 @@ resources:
             Name: jq.exe
             Url: https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-windows-amd64.exe
 
+        - name: fff-mcp
+          type: WinTools/DirectBinary
+          properties:
+            # dmtrKovalenko/fff ships only a library (.dll) plus this MCP server
+            # exe on Windows — no standalone CLI. The exe is the only runnable
+            # artifact, downloaded straight from the release CDN (no API call).
+            Name: fff-mcp.exe
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.1/fff-mcp-x86_64-pc-windows-msvc.exe
+
+        # fff search libraries — the release asset names are generic
+        # (x86_64-pc-windows-msvc.dll), so rename them to fff-prefixed names
+        # on disk to disambiguate. Same CDN download, no API call.
+        - name: fff-lib
+          type: WinTools/DirectBinary
+          properties:
+            Name: fff.dll
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.1/x86_64-pc-windows-msvc.dll
+
+        - name: fff-c-lib
+          type: WinTools/DirectBinary
+          properties:
+            Name: fff_c.dll
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.1/c-lib-x86_64-pc-windows-msvc.dll
+
         - name: rustup-init
           type: WinTools/DirectBinary
           properties:
