@@ -134,7 +134,16 @@ class GithubReleaseTool {
     hidden [string] GetInstalledVersion([string]$BinaryPath) {
         if (-not (Test-Path $BinaryPath)) { return '' }
         try {
-            $out = & $BinaryPath --version 2>&1 | Out-String
+            # Run from the binary's own directory: some tools (e.g. hypa) walk
+            # up from the process CWD doing project-root detection and crash
+            # when dsc's CWD is an unreadable path like C:\Program Files\WindowsApps.
+            $out = ''
+            Push-Location (Split-Path -Parent $BinaryPath)
+            try {
+                $out = & $BinaryPath --version 2>&1 | Out-String
+            } finally {
+                Pop-Location
+            }
             if ($out -match $this.VersionRegex) { return $matches[1] }
         } catch {
             return ''
@@ -223,7 +232,16 @@ class DirectArchive {
     hidden [string] GetInstalledVersion([string]$BinaryPath) {
         if (-not (Test-Path $BinaryPath)) { return '' }
         try {
-            $out = & $BinaryPath --version 2>&1 | Out-String
+            # Run from the binary's own directory: some tools (e.g. hypa) walk
+            # up from the process CWD doing project-root detection and crash
+            # when dsc's CWD is an unreadable path like C:\Program Files\WindowsApps.
+            $out = ''
+            Push-Location (Split-Path -Parent $BinaryPath)
+            try {
+                $out = & $BinaryPath --version 2>&1 | Out-String
+            } finally {
+                Pop-Location
+            }
             if ($out -match $this.VersionRegex) { return $matches[1] }
         } catch {
             return ''
