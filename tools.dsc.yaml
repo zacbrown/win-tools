@@ -164,6 +164,16 @@ resources:
               - tree-sitter-typescript.dll
               - tree-sitter-verilog.dll
 
+        - name: npiperelay
+          type: WinTools/DirectArchive
+          properties:
+            Name: npiperelay
+            Url: https://github.com/jstarks/npiperelay/releases/download/v0.1.0/npiperelay_windows_amd64.zip
+            # No Version pin: npiperelay has no --version flag, so Test() is
+            # just "does the binary exist" (a pinned Version would re-install
+            # on every apply since the version check would never match).
+            Binaries: [npiperelay.exe]
+
         - name: claude-code
           type: WinTools/ScriptInstaller
           properties:
