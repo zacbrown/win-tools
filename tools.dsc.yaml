@@ -182,7 +182,7 @@ resources:
             Version: 1.3.1
             # age.exe first: it drives the version check (age --version prints
             # "v1.3.1", and the default (\d+\.\d+\.\d+) regex extracts 1.3.1).
-            Binaries: [age.exe, age-keygen.exe]
+            Binaries: [age.exe, age-keygen.exe, age-plugin-batchpass.exe, age-inspect.exe]
 
 
         - name: claude-code
