@@ -23,8 +23,8 @@ resources:
           type: WinTools/DirectArchive
           properties:
             Name: ripgrep
-            Url: https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-pc-windows-msvc.zip
-            Version: 15.1.0
+            Url: https://github.com/BurntSushi/ripgrep/releases/download/15.2.0/ripgrep-15.2.0-x86_64-pc-windows-msvc.zip
+            Version: 15.2.0
             Binaries: [rg.exe]
 
         - name: fd
@@ -39,32 +39,32 @@ resources:
           type: WinTools/DirectArchive
           properties:
             Name: fzf
-            Url: https://github.com/junegunn/fzf/releases/download/v0.72.0/fzf-0.72.0-windows_amd64.zip
-            Version: 0.72.0
+            Url: https://github.com/junegunn/fzf/releases/download/v0.74.2/fzf-0.74.2-windows_amd64.zip
+            Version: 0.74.2
             Binaries: [fzf.exe]
 
         - name: just
           type: WinTools/DirectArchive
           properties:
             Name: just
-            Url: https://github.com/casey/just/releases/download/1.51.0/just-1.51.0-x86_64-pc-windows-msvc.zip
-            Version: 1.51.0
+            Url: https://github.com/casey/just/releases/download/1.58.0/just-1.58.0-x86_64-pc-windows-msvc.zip
+            Version: 1.58.0
             Binaries: [just.exe]
 
         - name: uv
           type: WinTools/DirectArchive
           properties:
             Name: uv
-            Url: https://github.com/astral-sh/uv/releases/download/0.11.14/uv-x86_64-pc-windows-msvc.zip
-            Version: 0.11.14
+            Url: https://github.com/astral-sh/uv/releases/download/0.12.3/uv-x86_64-pc-windows-msvc.zip
+            Version: 0.12.3
             Binaries: [uv.exe, uvx.exe]
 
         - name: gh
           type: WinTools/DirectArchive
           properties:
             Name: gh
-            Url: https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_windows_amd64.zip
-            Version: 2.92.0
+            Url: https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_windows_amd64.zip
+            Version: 2.97.0
             Binaries: [gh.exe]
 
         - name: jq
@@ -80,7 +80,7 @@ resources:
             # exe on Windows — no standalone CLI. The exe is the only runnable
             # artifact, downloaded straight from the release CDN (no API call).
             Name: fff-mcp.exe
-            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.1/fff-mcp-x86_64-pc-windows-msvc.exe
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.3/fff-mcp-x86_64-pc-windows-msvc.exe
 
         # fff search libraries — the release asset names are generic
         # (x86_64-pc-windows-msvc.dll), so rename them to fff-prefixed names
@@ -89,13 +89,13 @@ resources:
           type: WinTools/DirectBinary
           properties:
             Name: fff.dll
-            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.1/x86_64-pc-windows-msvc.dll
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.3/x86_64-pc-windows-msvc.dll
 
         - name: fff-c-lib
           type: WinTools/DirectBinary
           properties:
             Name: fff_c.dll
-            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.1/c-lib-x86_64-pc-windows-msvc.dll
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.3/c-lib-x86_64-pc-windows-msvc.dll
 
         - name: rustup-init
           type: WinTools/DirectBinary
@@ -107,24 +107,24 @@ resources:
           type: WinTools/DirectArchive
           properties:
             Name: dprint
-            Url: https://github.com/dprint/dprint/releases/download/0.54.0/dprint-x86_64-pc-windows-msvc.zip
-            Version: 0.54.0
+            Url: https://github.com/dprint/dprint/releases/download/0.55.2/dprint-x86_64-pc-windows-msvc.zip
+            Version: 0.55.2
             Binaries: [dprint.exe]
 
         - name: beads
           type: WinTools/DirectArchive
           properties:
             Name: beads
-            Url: https://github.com/gastownhall/beads/releases/download/v1.0.4/beads_1.0.4_windows_amd64.zip
-            Version: 1.0.4
+            Url: https://github.com/gastownhall/beads/releases/download/v1.1.2/beads_1.1.2_windows_amd64.zip
+            Version: 1.1.2
             Binaries: [bd.exe]
 
         - name: hypa
           type: WinTools/DirectArchive
           properties:
             Name: hypa
-            Url: https://github.com/Hypabolic/Hypa/releases/download/v0.1.11/hypa-win-x64.zip
-            Version: 0.1.11
+            Url: https://github.com/Hypabolic/Hypa/releases/download/v0.1.13/hypa-win-x64.zip
+            Version: 0.1.13
             # hypa.exe first: it drives the version check. The DLLs are runtime
             # dependencies that must sit next to the exe (sqlite storage +
             # tree-sitter grammars are loaded from the exe's directory).
