@@ -67,6 +67,14 @@ resources:
             Version: 2.97.0
             Binaries: [gh.exe]
 
+        - name: 1password-cli
+          type: WinTools/DirectArchive
+          properties:
+            Name: 1password-cli
+            Url: https://cache.agilebits.com/dist/1P/op2/pkg/v2.39.0/op_windows_amd64_v2.39.0.zip
+            Version: 2.39.0
+            Binaries: [op.exe]
+
         - name: jq
           type: WinTools/DirectBinary
           properties:
