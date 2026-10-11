@@ -127,51 +127,13 @@ resources:
             Version: 1.3.1
             Binaries: [bd.exe]
 
-        - name: hypa
+        - name: rtk
           type: WinTools/DirectArchive
           properties:
-            Name: hypa
-            # v1.0.8 has no Windows archive; retain the installed Windows release.
-            Url: https://github.com/Hypabolic/Hypa/releases/download/v0.1.13/hypa-win-x64.zip
-            Version: 0.1.13
-            # hypa.exe first: it drives the version check. The DLLs are runtime
-            # dependencies that must sit next to the exe (sqlite storage +
-            # tree-sitter grammars are loaded from the exe's directory).
-            Binaries:
-              - hypa.exe
-              - e_sqlite3.dll
-              - tree-sitter.dll
-              - tree-sitter-agda.dll
-              - tree-sitter-bash.dll
-              - tree-sitter-c-sharp.dll
-              - tree-sitter-c.dll
-              - tree-sitter-cpp.dll
-              - tree-sitter-css.dll
-              - tree-sitter-embedded-template.dll
-              - tree-sitter-go.dll
-              - tree-sitter-haskell.dll
-              - tree-sitter-html.dll
-              - tree-sitter-java.dll
-              - tree-sitter-javascript.dll
-              - tree-sitter-jsdoc.dll
-              - tree-sitter-json.dll
-              - tree-sitter-julia.dll
-              - tree-sitter-markdown.dll
-              - tree-sitter-ocaml-type.dll
-              - tree-sitter-ocaml.dll
-              - tree-sitter-php.dll
-              - tree-sitter-python.dll
-              - tree-sitter-ql.dll
-              - tree-sitter-razor.dll
-              - tree-sitter-ruby.dll
-              - tree-sitter-rust.dll
-              - tree-sitter-scala.dll
-              - tree-sitter-swift.dll
-              - tree-sitter-toml.dll
-              - tree-sitter-tsq.dll
-              - tree-sitter-tsx.dll
-              - tree-sitter-typescript.dll
-              - tree-sitter-verilog.dll
+            Name: rtk
+            Url: https://github.com/rtk-ai/rtk/releases/download/v0.51.0/rtk-x86_64-pc-windows-msvc.zip
+            Version: 0.51.0
+            Binaries: [rtk.exe]
 
         - name: npiperelay
           type: WinTools/DirectArchive

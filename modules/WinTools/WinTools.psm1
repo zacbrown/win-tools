@@ -533,6 +533,7 @@ class DprintPlugin {
         Write-WinToolsLog "START $context Set"
         try {
             $resolved = [Environment]::ExpandEnvironmentVariables($this.ConfigPath)
+            if ($this.HasPlugin()) { return }
             $dir = Split-Path -Parent $resolved
             New-Item -ItemType Directory -Path $dir -Force | Out-Null
             if (-not (Test-Path $resolved)) {
@@ -546,7 +547,13 @@ class DprintPlugin {
             try {
                 $stage = "dprint config add $($this.Plugin) in $dir"
                 Write-WinToolsLog "$context $stage"
-                & $dprint config add $this.Plugin
+                # dprint writes compilation progress to stderr. The DSC adapter
+                # treats unredirected stderr as a script error, even on exit 0.
+                # Keep both native streams in the log and out of DSC's JSON.
+                $PSNativeCommandUseErrorActionPreference = $false
+                & $dprint config add $this.Plugin 2>&1 | ForEach-Object {
+                    Write-WinToolsLog "$context dprint: $_"
+                }
                 if ($LASTEXITCODE -ne 0) {
                     throw "dprint config add $($this.Plugin) failed (exit $LASTEXITCODE)"
                 }
@@ -570,7 +577,7 @@ class DprintPlugin {
             if (-not $cfg.PSObject.Properties['plugins']) { return $false }
             $needle = [regex]::Escape($this.Plugin)
             foreach ($p in $cfg.plugins) {
-                if ("$p" -match "/$needle-\d|/$needle\.wasm|/$needle\.json") { return $true }
+                if ("$p" -match "/$needle-\d|/$needle\.wasm|/$needle\.json|^npm:@dprint/$needle@") { return $true }
             }
         } catch {
             return $false

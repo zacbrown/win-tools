@@ -62,9 +62,15 @@ resources:
             if ($code -ne 0) { throw "Expected success, got ${code}: $output" }
             Assert-Match $text "END WinTools/DirectArchive .* Set"
             Assert-Match $text 'END install Action=set ExitCode=0'
+            Assert-Match $output 'SUCCESS: DSC set completed \(exit 0\)'
+            Assert-Match $output 'Final state: 1 OK, 0 need attention'
+            Assert-Match $output 'fixture\s+OK'
+            if ($output -match '"beforeState"| INFO | DEBUG ') { throw 'Raw DSC output leaked into the summary' }
             if (-not (Test-Path (Join-Path $env:WINTOOLS_TEST_BIN 'fixture.txt'))) { throw 'Fixture was not installed' }
         } else {
             if ($code -eq 0) { throw "Failure was not propagated for $mode" }
+            Assert-Match $output 'FAIL: DSC set failed \(exit \d+\)'
+            Assert-Match $output 'Final state unavailable'
             $stage = if ($mode -eq 'copy') { 'locate/copy' } else { $mode }
             Assert-Match $text "FAILED WinTools/DirectArchive .*Stage='$stage"
             Assert-Match $output "logging-fixture.*Stage='$stage"
@@ -78,7 +84,7 @@ resources:
     # Get/Test must still emit parseable DSC JSON; logging cannot enter stdout.
     @'
 param($Installer, $Action)
-& $Installer -Action $Action 6>$null
+& $Installer -Action $Action -OutputFormat json 6>$null
 exit $LASTEXITCODE
 '@ | Set-Content -LiteralPath (Join-Path $scratch 'read-state.ps1')
     foreach ($action in 'get', 'test') {
@@ -86,6 +92,12 @@ exit $LASTEXITCODE
         if ($LASTEXITCODE -ne 0) { throw "$action failed: $output" }
         $null = $output | ConvertFrom-Json
         Write-Host "PASS: $action JSON output"
+        $summary = & pwsh -NoProfile -File (Join-Path $scratch 'install.ps1') -Action $action -LogPath (Join-Path $scratch "$action-summary.log") 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw "$action summary failed: $summary" }
+        Assert-Match $summary "SUCCESS: DSC $action completed"
+        Assert-Match $summary 'Final state: 1 OK, 0 need attention'
+        Assert-Match $summary 'fixture\s+OK'
+        Write-Host "PASS: $action final state summary"
     }
     $defaultLogs = @(Get-ChildItem -LiteralPath (Join-Path $scratch 'logs') -Filter '*.log')
     if ($defaultLogs.Count -ne 2) { throw 'Expected unique default logs for get and test' }
