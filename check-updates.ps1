@@ -12,8 +12,8 @@
     For every github.com release-download URL in tools.dsc.yaml it extracts the tag
     currently pinned, compares it against the repo's latest published release
     (GET /repos/<owner>/<repo>/releases/latest), and -- when a newer release exists --
-    rewrites the file in place: it swaps the tag inside the Url (and any version
-    embedded in the asset filename) and bumps the matching Version: field. That is
+    verifies that the expected assets exist before rewriting the file in place.
+    It uses the published asset URLs and bumps the matching Version: field. That is
     exactly the two coordinated edits (Url + Version) that make the next ./install.ps1
     re-install the tool, since Test() then sees the pinned Version no longer matches
     the installed binary.
@@ -21,7 +21,8 @@
     Non-GitHub sources (e.g. rustup-init from static.rust-lang.org) and the
     claude-code ScriptInstaller have no such URL and are left untouched. Resources
     with no Version: field (e.g. the fff DirectBinary assets) still get their Url tag
-    bumped.
+    bumped. If any expected asset is missing, all entries for that repository are
+    left unchanged and reported as BLOCKED, including when the tag is unchanged.
 
     To raise the API rate limit (60/hr unauth -> 5000/hr auth) the script uses, in
     order: $env:GITHUB_TOKEN, then the token from an authenticated `gh` CLI
@@ -72,6 +73,7 @@ $urlLines = for ($i = 0; $i -lt $lines.Count; $i++) {
             Owner  = $m.Groups['owner'].Value
             Repo   = $m.Groups['repo'].Value
             Tag    = $m.Groups['tag'].Value
+            Asset  = [Uri]::UnescapeDataString($m.Groups['asset'].Value)
             Url    = $m.Value
             RepoId = "$($m.Groups['owner'].Value)/$($m.Groups['repo'].Value)"
         }
@@ -117,13 +119,13 @@ if ($auth.Token) {
 
 # Query each distinct repo's latest release exactly once.
 $latestCache = @{}
-function Get-LatestTag([string]$repoId) {
+function Get-LatestRelease([string]$repoId) {
     if ($latestCache.ContainsKey($repoId)) { return $latestCache[$repoId] }
     try {
         $resp = Invoke-RestMethod -Uri "https://api.github.com/repos/$repoId/releases/latest" -Headers $script:headers
-        $latestCache[$repoId] = [pscustomobject]@{ Tag = $resp.tag_name; Error = $null }
+        $latestCache[$repoId] = [pscustomobject]@{ Tag = $resp.tag_name; Assets = @($resp.assets); Error = $null }
     } catch {
-        $latestCache[$repoId] = [pscustomobject]@{ Tag = $null; Error = $_.Exception.Message }
+        $latestCache[$repoId] = [pscustomobject]@{ Tag = $null; Assets = @(); Error = $_.Exception.Message }
     }
     $latestCache[$repoId]
 }
@@ -131,17 +133,12 @@ function Get-LatestTag([string]$repoId) {
 # Rewrite lines[$urlIdx]'s Url tag/version, then bump the Version: field in the same
 # resource block. Mutates the script-scope $lines array. Returns $true if it changed
 # anything.
-function Update-Entry($entry, [string]$newTag) {
+function Update-Entry($entry, [string]$newTag, [string]$newUrl) {
     $oldTag = $entry.Tag
     $oldVer = Get-BareVersion $oldTag
     $newVer = Get-BareVersion $newTag
 
-    # Swap the tag first (it may contain the bare version as a substring), then swap
-    # any bare version embedded in the asset filename. Scoped to this one URL string.
-    $newUrl = $entry.Url.Replace($oldTag, $newTag)
-    if ($oldVer -and $oldVer -ne $oldTag) {
-        $newUrl = $newUrl.Replace($oldVer, $newVer)
-    }
+    # Use the URL returned by GitHub, never a guessed release-download URL.
     $script:lines[$entry.Index] = $script:lines[$entry.Index].Replace($entry.Url, $newUrl)
 
     # Bump the Version: field within the same resource entry (search forward until the
@@ -158,37 +155,52 @@ function Update-Entry($entry, [string]$newTag) {
 }
 
 # Evaluate every repo, collect one report row per distinct repo, and apply edits.
-$seenRepo = @{}
 $results  = @()
 $changed  = $false
 
-foreach ($entry in $urlLines) {
-    $latest = Get-LatestTag $entry.RepoId
+foreach ($group in ($urlLines | Group-Object RepoId)) {
+    $latest = Get-LatestRelease $group.Name
     $status = $null
+    $latestDisplay = $latest.Tag
 
     if ($latest.Error) {
         $status = 'error'
         $latestDisplay = "($($latest.Error))"
-    } elseif ($latest.Tag -eq $entry.Tag) {
-        $status = 'up to date'
-        $latestDisplay = $latest.Tag
     } else {
-        $status = if ($DryRun) { 'UPDATE (dry-run)' } else { 'UPDATED' }
-        $latestDisplay = $latest.Tag
-        if (-not $DryRun) {
-            if (Update-Entry $entry $latest.Tag) { $changed = $true }
+        $pending = @()
+        $missing = @()
+        foreach ($entry in $group.Group) {
+            # Only substitute the version in the asset name. Rewriting the entire
+            # URL can accidentally replace part of the new tag a second time.
+            $oldVer = Get-BareVersion $entry.Tag
+            $newVer = Get-BareVersion $latest.Tag
+            $expectedAsset = if ($oldVer) { $entry.Asset.Replace($oldVer, $newVer) } else { $entry.Asset }
+            $asset = $latest.Assets | Where-Object { $_.name -ceq $expectedAsset } | Select-Object -First 1
+            if (-not $asset -or -not $asset.browser_download_url) {
+                $missing += $expectedAsset
+            } elseif ($entry.Tag -cne $latest.Tag -or $entry.Url -cne $asset.browser_download_url) {
+                $pending += [pscustomobject]@{ Entry = $entry; Url = $asset.browser_download_url }
+            }
+        }
+        if ($missing.Count -gt 0) {
+            $status = "BLOCKED (missing assets: $($missing -join ', '); pins unchanged)"
+        } elseif ($pending.Count -eq 0) {
+            $status = 'up to date'
+        } else {
+            $status = if ($DryRun) { 'UPDATE (dry-run)' } else { 'UPDATED' }
+            if (-not $DryRun) {
+                foreach ($update in $pending) {
+                    if (Update-Entry $update.Entry $latest.Tag $update.Url) { $changed = $true }
+                }
+            }
         }
     }
 
-    # One row per repo (fff backs several Url lines; report it once).
-    if (-not $seenRepo.ContainsKey($entry.RepoId)) {
-        $seenRepo[$entry.RepoId] = $true
-        $results += [pscustomobject]@{
-            Repo   = $entry.RepoId
-            Pinned = $entry.Tag
-            Latest = $latestDisplay
-            Status = $status
-        }
+    $results += [pscustomobject]@{
+        Repo   = $group.Name
+        Pinned = ($group.Group.Tag | Select-Object -Unique) -join ', '
+        Latest = $latestDisplay
+        Status = $status
     }
 }
 
@@ -216,14 +228,20 @@ foreach ($r in $results) {
 }
 
 $updates = @($results | Where-Object { $_.Status -like 'UPDATE*' -or $_.Status -eq 'UPDATED' })
+$problems = @($results | Where-Object { $_.Status -eq 'error' -or $_.Status -like 'BLOCKED*' })
 Write-Host ''
 if ($DryRun) {
     Write-Host ("{0} repo(s) checked, {1} update(s) available (dry-run -- no changes written)." -f $results.Count, $updates.Count)
 } elseif ($changed) {
     Write-Host ("{0} repo(s) checked, {1} update(s) written to {2}." -f $results.Count, $updates.Count, (Split-Path -Leaf $ConfigPath))
     Write-Host "Run ./install.ps1 to install the bumped versions." -ForegroundColor Cyan
-} else {
+} elseif ($problems.Count -eq 0) {
     Write-Host ("{0} repo(s) checked, everything up to date." -f $results.Count)
 }
 
+if ($problems.Count -gt 0) {
+    Write-Warning ("{0} repo(s) blocked or could not be checked; their pins were left unchanged. Review the report above." -f $problems.Count)
+    exit 2
+}
 if ($updates.Count -gt 0) { exit 1 }
+exit 0

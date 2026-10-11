@@ -31,16 +31,16 @@ resources:
           type: WinTools/DirectArchive
           properties:
             Name: fd
-            Url: https://github.com/sharkdp/fd/releases/download/v10.4.2/fd-v10.4.2-x86_64-pc-windows-msvc.zip
-            Version: 10.4.2
+            Url: https://github.com/sharkdp/fd/releases/download/v10.5.0/fd-v10.5.0-x86_64-pc-windows-msvc.zip
+            Version: 10.5.0
             Binaries: [fd.exe]
 
         - name: fzf
           type: WinTools/DirectArchive
           properties:
             Name: fzf
-            Url: https://github.com/junegunn/fzf/releases/download/v0.74.2/fzf-0.74.2-windows_amd64.zip
-            Version: 0.74.2
+            Url: https://github.com/junegunn/fzf/releases/download/v0.74.4/fzf-0.74.4-windows_amd64.zip
+            Version: 0.74.4
             Binaries: [fzf.exe]
 
         - name: just
@@ -55,16 +55,16 @@ resources:
           type: WinTools/DirectArchive
           properties:
             Name: uv
-            Url: https://github.com/astral-sh/uv/releases/download/0.12.3/uv-x86_64-pc-windows-msvc.zip
-            Version: 0.12.3
+            Url: https://github.com/astral-sh/uv/releases/download/0.13.0/uv-x86_64-pc-windows-msvc.zip
+            Version: 0.13.0
             Binaries: [uv.exe, uvx.exe]
 
         - name: gh
           type: WinTools/DirectArchive
           properties:
             Name: gh
-            Url: https://github.com/cli/cli/releases/download/v2.97.0/gh_2.97.0_windows_amd64.zip
-            Version: 2.97.0
+            Url: https://github.com/cli/cli/releases/download/v2.102.0/gh_2.102.0_windows_amd64.zip
+            Version: 2.102.0
             Binaries: [gh.exe]
 
         - name: 1password-cli
@@ -88,7 +88,7 @@ resources:
             # exe on Windows — no standalone CLI. The exe is the only runnable
             # artifact, downloaded straight from the release CDN (no API call).
             Name: fff-mcp.exe
-            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.3/fff-mcp-x86_64-pc-windows-msvc.exe
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.11.0/fff-mcp-x86_64-pc-windows-msvc.exe
 
         # fff search libraries — the release asset names are generic
         # (x86_64-pc-windows-msvc.dll), so rename them to fff-prefixed names
@@ -97,13 +97,13 @@ resources:
           type: WinTools/DirectBinary
           properties:
             Name: fff.dll
-            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.3/x86_64-pc-windows-msvc.dll
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.11.0/x86_64-pc-windows-msvc.dll
 
         - name: fff-c-lib
           type: WinTools/DirectBinary
           properties:
             Name: fff_c.dll
-            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.10.3/c-lib-x86_64-pc-windows-msvc.dll
+            Url: https://github.com/dmtrKovalenko/fff/releases/download/v0.11.0/c-lib-x86_64-pc-windows-msvc.dll
 
         - name: rustup-init
           type: WinTools/DirectBinary
@@ -115,22 +115,23 @@ resources:
           type: WinTools/DirectArchive
           properties:
             Name: dprint
-            Url: https://github.com/dprint/dprint/releases/download/0.55.2/dprint-x86_64-pc-windows-msvc.zip
-            Version: 0.55.2
+            Url: https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-pc-windows-msvc.zip
+            Version: 0.61.1
             Binaries: [dprint.exe]
 
         - name: beads
           type: WinTools/DirectArchive
           properties:
             Name: beads
-            Url: https://github.com/gastownhall/beads/releases/download/v1.1.2/beads_1.1.2_windows_amd64.zip
-            Version: 1.1.2
+            Url: https://github.com/gastownhall/beads/releases/download/v1.3.1/beads_1.3.1_windows_amd64.zip
+            Version: 1.3.1
             Binaries: [bd.exe]
 
         - name: hypa
           type: WinTools/DirectArchive
           properties:
             Name: hypa
+            # v1.0.8 has no Windows archive; retain the installed Windows release.
             Url: https://github.com/Hypabolic/Hypa/releases/download/v0.1.13/hypa-win-x64.zip
             Version: 0.1.13
             # hypa.exe first: it drives the version check. The DLLs are runtime
@@ -186,8 +187,8 @@ resources:
           type: WinTools/DirectArchive
           properties:
             Name: age
-            Url: https://github.com/FiloSottile/age/releases/download/v1.3.1/age-v1.3.1-windows-amd64.zip
-            Version: 1.3.1
+            Url: https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-windows-amd64.zip
+            Version: 1.3.2
             # age.exe first: it drives the version check (age --version prints
             # "v1.3.1", and the default (\d+\.\d+\.\d+) regex extracts 1.3.1).
             Binaries: [age.exe, age-keygen.exe, age-plugin-batchpass.exe, age-inspect.exe]

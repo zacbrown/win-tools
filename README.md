@@ -36,7 +36,26 @@ Optionally set `$env:GITHUB_TOKEN` before running to bump the GitHub API rate li
 ./install.ps1 -Action get
 ```
 
+Every run prints its log location and saves a timestamped log under `logs/` (ignored by Git). The log records each resource's `Get`, `Test`, and `Set` calls, the tool name and pinned version/URL, installation stages, errors with PowerShell stack traces, DSC output, and DSC's exit code. Resource logging works inside the PowerShell adapter's child processes.
+
+```powershell
+# More detailed DSC tracing, with a chosen log path (appends if it exists)
+./install.ps1 -TraceLevel debug -LogPath ./logs/debug.log
+
+# Find the resource and stage that failed in the latest default log
+$log = Get-ChildItem ./logs/install-*.log | Sort-Object LastWriteTime | Select-Object -Last 1
+Select-String -LiteralPath $log.FullName -Pattern 'FAILED|download|extract|locate/copy'
+```
+
+Failures include the resource name and stage in the terminal, for example `WinTools/DirectArchive Name='fzf' ... Set Stage='download https://...' failed: ... 404 (Not Found)`. The wrapper preserves DSC's nonzero exit code. `-TraceLevel trace` enables the most detailed DSC diagnostics. Logs remain on disk until you remove them.
+
+Offline logging integration checks (requires DSC and PowerShell 7.2+): `pwsh -NoProfile -File ./tests/Logging.Tests.ps1`. These use a temporary module copy with simulated downloads; they do not install real tools.
+
 ## Adding or updating a tool
+
+Run `./check-updates.ps1 -DryRun` to check GitHub releases without changing the playbook. Run `./check-updates.ps1` to update pins, review `git diff -- tools.dsc.yaml`, then run `./install.ps1` to install them. The checker verifies that every expected asset for a repository exists in its latest release before changing that repository's pins. Missing or renamed assets are reported as `BLOCKED` and require review; it never guesses a replacement platform or asset. This also detects missing assets when the pinned tag already matches the latest release.
+
+The checker's exit codes are `0` for up to date, `1` for updates available/applied, and `2` for blocked assets or API errors. Other repositories with valid assets can still be updated when one is blocked. Non-GitHub sources are skipped. Offline regression checks: `pwsh -NoProfile -File ./tests/CheckUpdates.Tests.ps1`.
 
 Tools are pinned to specific release-download URLs in [`tools.dsc.yaml`](tools.dsc.yaml). To bump a version, edit both `Url` and `Version` on the resource — the next `set` will re-install because `Test()` compares the pinned `Version` against `<binary> --version`.
 
